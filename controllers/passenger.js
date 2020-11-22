@@ -25,6 +25,7 @@ module.exports = {
                 postalCode,
                 city
             } = req.body;
+           
 
             Passenger.findOne({
                 where: {

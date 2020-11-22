@@ -10,10 +10,12 @@ const sequelize = require('./database/database');
 
 // CUSTOM ROUTERS
 var indexRouter = require('./routes/index');
+var bookingRouter = require('./routes/booking');
 var adminRouter = require('./routes/admin');
 var chatRouter = require('./routes/message');
 var driverRouter = require('./routes/driver');
 var passengerRouter = require('./routes/passenger');
+var savedLocationRouter = require('./routes/saved_location');
 
 
 
@@ -54,9 +56,11 @@ app.use((req, res, next) => {
 // CUSTOM ROUTES
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
+app.use('/booking', bookingRouter);
 app.use('/chat', chatRouter);
 app.use('/driver', driverRouter);
 app.use('/passenger', passengerRouter);
+app.use('/saved-location', savedLocationRouter);
 
 
 
