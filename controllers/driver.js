@@ -376,7 +376,7 @@ module.exports = {
     },
     async getBalanceById(req, res, next) {
         try {
-            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'balance']  });
+            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'balance', 'viacard', 'viacash'] });
             return res.status(http_status_codes.StatusCodes.OK).json(driver);
 
         } catch (error) {
@@ -388,7 +388,7 @@ module.exports = {
 
     async getViaCashBalanceById(req, res, next) {
         try {
-            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'viacash']  });
+            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'viacash'] });
             return res.status(http_status_codes.StatusCodes.OK).json(driver);
 
         } catch (error) {
@@ -399,7 +399,7 @@ module.exports = {
     },
     async getViaCardBalanceById(req, res, next) {
         try {
-            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'viacard']  });
+            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'viacard'] });
             return res.status(http_status_codes.StatusCodes.OK).json(driver);
 
         } catch (error) {
@@ -423,7 +423,7 @@ module.exports = {
 
     async getRatingBalanceById(req, res, next) {
         try {
-            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'rating','balance'] });
+            const driver = await Driver.findOne({ where: { id: req.params.driverId }, attributes: ['id', 'rating', 'balance'] });
             return res.status(http_status_codes.StatusCodes.OK).json(driver);
 
         } catch (error) {

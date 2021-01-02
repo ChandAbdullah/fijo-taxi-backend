@@ -114,7 +114,7 @@ module.exports = {
 
     async getAllContactUssByPassenger(req, res, next) {
         try {
-            const contactUss = await ContactUs.findAll({ where: { driverId: null }, include: { model: Passenger } });
+            const contactUss = await ContactUs.findAll({ where: { driverId: null }, include: { model: Passenger, attributes: ['email', 'firstName', 'lastName'] } });
             return res.status(http_status_codes.StatusCodes.OK).json(contactUss);
         }
         catch (err) {
@@ -126,7 +126,7 @@ module.exports = {
 
     async getAllContactUssByDriver(req, res, next) {
         try {
-            const contactUss = await ContactUs.findAll({ where: { passengerId: null }, include: { model: Driver } });
+            const contactUss = await ContactUs.findAll({ where: { passengerId: null }, include: { model: Driver, attributes: ['email', 'firstName', 'lastName'] } });
             return res.status(http_status_codes.StatusCodes.OK).json(contactUss);
         }
         catch (err) {
