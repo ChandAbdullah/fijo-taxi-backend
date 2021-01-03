@@ -200,6 +200,38 @@ module.exports = {
         }
     },
 
+    async getallAvailableDrivers(req, res, next) {
+        try {
+
+            const driver = await Driver.findAll({
+                where: {
+                    [op.and]: [{
+                        diverAvailablity: true
+                    },
+                    {
+                        isApproved: true
+                    }
+                    ]
+                }
+            });
+            if (driver) {
+                return res.status(http_status_codes.StatusCodes.OK).json({
+                    driver: driver,
+                    isDriverExist: true
+                });
+            } else {
+                return res.status(http_status_codes.StatusCodes.OK).json({
+                    driver: null,
+                    isDriverExist: false
+                });
+            }
+        } catch (err) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "Error Occurd in finding find Available Drivers"
+            });
+        }
+    },
+
     async approveDriver(req, res, next) {
         try {
             driverId = req.params.driverId;

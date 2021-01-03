@@ -29,7 +29,7 @@ router.post('/forgot-password', driverController.forgotPassword); // this api ca
 
 router.post('/find-driver-by-email', driverController.findDriverByEmail);
 router.post('/find-driver-by-phn-no', driverController.findDriverByPhoneNumber);
-
+router.get('/getallAvailableDrivers', driverController.getallAvailableDrivers);
 
 
 module.exports = router;
