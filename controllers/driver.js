@@ -102,7 +102,7 @@ module.exports = {
                             })
                         } else if (isDriverExist.isApproved == false) {
                             res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
-                                message: 'Sorry, you are not approved by Admin yet.'
+                                error: 'Sorry, you are not approved by Admin yet.'
                             });
                         }
                     } else {
@@ -151,6 +151,51 @@ module.exports = {
         } catch (error) {
             return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: "Error Occurd in Fetching All Approved"
+            });
+        }
+    },
+
+
+    async findDriverByEmail(req, res, next) {
+        try {
+            const {
+                email
+            } = req.body;
+
+            const driver = await Driver.findOne({
+                where: { email: email }
+            });
+            if (driver) {
+                return res.status(http_status_codes.StatusCodes.OK).json({ driver: driver, isDriverExist: true });
+            } else {
+                return res.status(http_status_codes.StatusCodes.OK).json({ driver: null, isDriverExist: false });
+            }
+        }
+        catch (err) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "Error Occurd in finding findDriverByEmail"
+            });
+        }
+    },
+
+    async findDriverByPhoneNumber(req, res, next) {
+        try {
+            const {
+                phoneNumber
+            } = req.body;
+
+            const driver = await Driver.findOne({
+                where: { phoneNumber: phoneNumber }
+            });
+            if (driver) {
+                return res.status(http_status_codes.StatusCodes.OK).json({ driver: driver, isDriverExist: true });
+            } else {
+                return res.status(http_status_codes.StatusCodes.OK).json({ driver: null, isDriverExist: false });
+            }
+        }
+        catch (err) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "Error Occurd in finding findDriverByphoneNumber"
             });
         }
     },

@@ -35,5 +35,16 @@ module.exports = function (io) {
             console.log(data, '------------end------------')
             io.emit('isEnded' + data.receiverId, data);
         });
+
+        // For Sending Dispatcher From Passenger App
+        socket.on('reqNotFoundSendRequestToAdminPanel', data => {
+            io.emit('ReceiveRequestDispatcher', data);
+        });
+
+        // For Sending Dispatcher From Admin Pannel To Driver App
+        socket.on('send-data-to-specific-driver', data => {
+            io.emit('receive-data-of-driver' + data.driverId, data.objFromRequest);
+        });
+
     });
 }
