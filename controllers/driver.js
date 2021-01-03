@@ -56,7 +56,7 @@ module.exports = {
                         isApproved: false
                     })
                         .then((driver) => {
-                            return res.status(http_status_codes.StatusCodes.CREATED).json({ message: 'Driver is Created Successfully', driverId: driver.id });
+                            return res.status(http_status_codes.StatusCodes.CREATED).json({ message: 'Driver is Created Successfully', driverId: driver.id, driverObj: driver });
                         });
                 }
             });
