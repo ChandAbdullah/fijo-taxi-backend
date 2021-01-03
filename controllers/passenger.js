@@ -168,7 +168,6 @@ module.exports = {
                 firstName,
                 lastName,
                 phoneNumber,
-                addressWithCityAndPostcode,
                 gender,
                 profilePhoto,
                 address,
