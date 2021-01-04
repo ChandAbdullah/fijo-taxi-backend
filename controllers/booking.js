@@ -15,40 +15,6 @@ const {
 
 module.exports = {
 
-
-    async findDrivers(req, res, next) {
-        try {
-
-            const {
-                carSizeId,
-                city
-
-            } = req.body;
-            const drivers = await Driver.findAll({
-
-                where: {
-                    [op.and]:
-                        [
-                            { city: city },
-                            { isAvailable: true }
-                        ]
-                },
-                include: [
-                    {
-                        model: Vehicle,
-                        where: { carSizeId: carSizeId }
-                    }
-                ]
-            });
-            return res.status(http_status_codes.StatusCodes.OK).json(drivers);
-        }
-        catch (err) {
-            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
-                message: "Error Occurd in finding drivers"
-            });
-        }
-    },
-
     async createBooking(req, res, next) {
         try {
             const {
@@ -330,15 +296,12 @@ module.exports = {
         }
     },
 
-
-
     async findNearByDrivers(req, res, next) {
         try {
             driversArray = [];
             const {
                 noOfSeating,
                 vehicleType,
-                city,
                 currentLat,
                 currentLng,
                 searchInKM,
@@ -352,86 +315,332 @@ module.exports = {
                 exactPriceForPassenger
             } = req.body;
 
-            const drivers = await Driver.findAll(
-                {
-                    where: {
-                        [op.and]:
-                            [
-                                { diverAvailablity: true },
-                                { city: city }
-                            ]
-                    },
-                    include: [
-                        {
-                            model: Vehicle,
-                            where: {
-                                [op.and]:
-                                    [
-                                        { noOfSeating: noOfSeating },
-                                        { vehicleType: vehicleType }
-                                    ]
-                            },
-                        }
-                    ]
-                }
-            );
+            if (noOfSeating == 4 && vehicleType !== 'lite') {
 
+                const drivers = await Driver.findAll(
+                    {
+                        where: {
+                            [op.and]:
+                                [
+                                    { diverAvailablity: true },
+                                    // { city: city } we are searching based on km not city
+                                ]
+                        },
+                        include: [
+                            {
+                                model: Vehicle,
+                                where: {
+                                    [op.and]:
+                                        [
+                                            { vehicleType: vehicleType }
+                                        ]
+                                },
+                            }
+                        ]
+                    }
+                );
 
-            if (drivers.length !== 0) {
-                var passengerCurrentLocation = {
-                    lat: currentLat,
-                    lon: currentLng
-                };
-
-                var objFromRequest = {
-                    paymentVia: paymentVia,
-                    passengerObj: passengerObj,
-                    origin: origin,
-                    destination: destination,
-                    estTime: estTime,
-                    totalKM: totalKM,
-                    exactPriceForDriver: exactPriceForDriver,
-                    exactPriceForPassenger: exactPriceForPassenger
-
-                }
-
-                await drivers.forEach(async driver => {
-                    var isNearByDriverLocation = {
-                        lat: driver.currentLat,
-                        lon: driver.currentLng
+                if (drivers.length !== 0) {
+                    var passengerCurrentLocation = {
+                        lat: currentLat,
+                        lon: currentLng
                     };
 
-                    var dist = geodist(passengerCurrentLocation, isNearByDriverLocation, {
-                        format: true,
-                        unit: 'meters'
-                    });
+                    var objFromRequest = {
+                        paymentVia: paymentVia,
+                        passengerObj: passengerObj,
+                        origin: origin,
+                        destination: destination,
+                        estTime: estTime,
+                        totalKM: totalKM,
+                        exactPriceForDriver: exactPriceForDriver,
+                        exactPriceForPassenger: exactPriceForPassenger
 
-                    var distinmeters = dist.substr(0, dist.indexOf(' '));
-
-                    if (distinmeters < (searchInKM * 1000)) {
-                        var obj = {
-
-                            driverId: driver.id
-                        }
-
-                        driversArray.push(obj);
                     }
-                });
-                if (driversArray.length !== 0) {
 
-                    return res.status(http_status_codes.StatusCodes.OK).json(
-                        { driversIds: driversArray, objFromRequest: objFromRequest }
-                    );
+                    await drivers.forEach(async driver => {
+                        var isNearByDriverLocation = {
+                            lat: driver.currentLat,
+                            lon: driver.currentLng
+                        };
 
+                        var dist = geodist(passengerCurrentLocation, isNearByDriverLocation, {
+                            format: true,
+                            unit: 'meters'
+                        });
+
+                        var distinmeters = dist.substr(0, dist.indexOf(' '));
+
+                        if (distinmeters < (searchInKM * 1000)) {
+                            var obj = {
+
+                                driverId: driver.id
+                            }
+
+                            driversArray.push(obj);
+                        }
+                    });
+                    if (driversArray.length !== 0) {
+
+                        return res.status(http_status_codes.StatusCodes.OK).json(
+                            { driversIds: driversArray, objFromRequest: objFromRequest }
+                        );
+
+                    } else {
+                        return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
+                            errors: 'Oooops! No Near By Driver is Found!'
+                        });
+                    }
                 } else {
                     return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
-                        errors: 'Oooops! No Near By Driver is Found!'
+                        errors: 'No Driver Registered yet!'
                     });
                 }
-            } else {
-                return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
-                    errors: 'No Driver Registered yet!'
-                });
+
+            } else if (noOfSeating == 5 && vehicleType !== 'lite') {
+
+                const drivers = await Driver.findAll(
+                    {
+                        where: {
+                            [op.and]:
+                                [
+                                    { diverAvailablity: true },
+                                    // { city: city } we are searching based on km not city
+                                ]
+                        },
+                        include: [
+                            {
+                                model: Vehicle,
+                                where: {
+                                    [op.and]:
+                                        [
+                                            { noOfSeating: { [op.or]: [5, 6] } },
+                                            { vehicleType: vehicleType }
+                                        ]
+                                },
+                            }
+                        ]
+                    }
+                );
+
+                if (drivers.length !== 0) {
+                    var passengerCurrentLocation = {
+                        lat: currentLat,
+                        lon: currentLng
+                    };
+
+                    var objFromRequest = {
+                        paymentVia: paymentVia,
+                        passengerObj: passengerObj,
+                        origin: origin,
+                        destination: destination,
+                        estTime: estTime,
+                        totalKM: totalKM,
+                        exactPriceForDriver: exactPriceForDriver,
+                        exactPriceForPassenger: exactPriceForPassenger
+
+                    }
+
+                    await drivers.forEach(async driver => {
+                        var isNearByDriverLocation = {
+                            lat: driver.currentLat,
+                            lon: driver.currentLng
+                        };
+
+                        var dist = geodist(passengerCurrentLocation, isNearByDriverLocation, {
+                            format: true,
+                            unit: 'meters'
+                        });
+
+                        var distinmeters = dist.substr(0, dist.indexOf(' '));
+
+                        if (distinmeters < (searchInKM * 1000)) {
+                            var obj = {
+
+                                driverId: driver.id
+                            }
+
+                            driversArray.push(obj);
+                        }
+                    });
+                    if (driversArray.length !== 0) {
+
+                        return res.status(http_status_codes.StatusCodes.OK).json(
+                            { driversIds: driversArray, objFromRequest: objFromRequest }
+                        );
+
+                    } else {
+                        return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
+                            errors: 'Oooops! No Near By Driver is Found!'
+                        });
+                    }
+                } else {
+                    return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
+                        errors: 'No Driver Registered yet!'
+                    });
+                }
+
+            } else if (noOfSeating == 6 && vehicleType !== 'lite') {
+
+                const drivers = await Driver.findAll(
+                    {
+                        where: {
+                            [op.and]:
+                                [
+                                    { diverAvailablity: true },
+                                    // { city: city } we are searching based on km not city
+                                ]
+                        },
+                        include: [
+                            {
+                                model: Vehicle,
+                                where: {
+                                    [op.and]:
+                                        [
+                                            { noOfSeating: 6 },
+                                            { vehicleType: vehicleType }
+                                        ]
+                                },
+                            }
+                        ]
+                    }
+                );
+
+                if (drivers.length !== 0) {
+                    var passengerCurrentLocation = {
+                        lat: currentLat,
+                        lon: currentLng
+                    };
+
+                    var objFromRequest = {
+                        paymentVia: paymentVia,
+                        passengerObj: passengerObj,
+                        origin: origin,
+                        destination: destination,
+                        estTime: estTime,
+                        totalKM: totalKM,
+                        exactPriceForDriver: exactPriceForDriver,
+                        exactPriceForPassenger: exactPriceForPassenger
+                    }
+
+                    await drivers.forEach(async driver => {
+                        var isNearByDriverLocation = {
+                            lat: driver.currentLat,
+                            lon: driver.currentLng
+                        };
+
+                        var dist = geodist(passengerCurrentLocation, isNearByDriverLocation, {
+                            format: true,
+                            unit: 'meters'
+                        });
+
+                        var distinmeters = dist.substr(0, dist.indexOf(' '));
+
+                        if (distinmeters < (searchInKM * 1000)) {
+                            var obj = {
+
+                                driverId: driver.id
+                            }
+
+                            driversArray.push(obj);
+                        }
+                    });
+                    if (driversArray.length !== 0) {
+
+                        return res.status(http_status_codes.StatusCodes.OK).json(
+                            { driversIds: driversArray, objFromRequest: objFromRequest }
+                        );
+
+                    } else {
+                        return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
+                            errors: 'Oooops! No Near By Driver is Found!'
+                        });
+                    }
+                } else {
+                    return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
+                        errors: 'No Driver Registered yet!'
+                    });
+                }
+            } else if (vehicleType === 'lite') {
+
+                const drivers = await Driver.findAll(
+                    {
+                        where: {
+                            [op.and]:
+                                [
+                                    { diverAvailablity: true },
+                                    // { city: city } we are searching based on km not city
+                                ]
+                        },
+                        include: [
+                            {
+                                model: Vehicle,
+                                where: {
+                                    [op.and]:
+                                        [
+                                            { vehicleType: vehicleType }
+                                        ]
+                                },
+                            }
+                        ]
+                    }
+                );
+
+                if (drivers.length !== 0) {
+                    var passengerCurrentLocation = {
+                        lat: currentLat,
+                        lon: currentLng
+                    };
+
+                    var objFromRequest = {
+                        paymentVia: paymentVia,
+                        passengerObj: passengerObj,
+                        origin: origin,
+                        destination: destination,
+                        estTime: estTime,
+                        totalKM: totalKM,
+                        exactPriceForDriver: exactPriceForDriver,
+                        exactPriceForPassenger: exactPriceForPassenger
+                    }
+
+                    await drivers.forEach(async driver => {
+                        var isNearByDriverLocation = {
+                            lat: driver.currentLat,
+                            lon: driver.currentLng
+                        };
+
+                        var dist = geodist(passengerCurrentLocation, isNearByDriverLocation, {
+                            format: true,
+                            unit: 'meters'
+                        });
+
+                        var distinmeters = dist.substr(0, dist.indexOf(' '));
+
+                        if (distinmeters < (searchInKM * 1000)) {
+                            var obj = {
+
+                                driverId: driver.id
+                            }
+
+                            driversArray.push(obj);
+                        }
+                    });
+                    if (driversArray.length !== 0) {
+
+                        return res.status(http_status_codes.StatusCodes.OK).json(
+                            { driversIds: driversArray, objFromRequest: objFromRequest }
+                        );
+
+                    } else {
+                        return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
+                            errors: 'Oooops! No Near By Driver is Found!'
+                        });
+                    }
+                } else {
+                    return res.status(http_status_codes.StatusCodes.NOT_FOUND).json({
+                        errors: 'No Driver Registered yet!'
+                    });
+                }
             }
 
         } catch (err) {
