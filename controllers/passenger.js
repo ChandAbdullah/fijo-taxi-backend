@@ -180,9 +180,6 @@ module.exports = {
                 phoneNumber: phoneNumber,
                 gender: gender,
                 profilePhoto: profilePhoto,
-                address: address,
-                postalCode: postalCode,
-                city: city
             }, {
                 where: {
                     id: passengerId
