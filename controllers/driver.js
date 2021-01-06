@@ -392,12 +392,17 @@ module.exports = {
             const {
                 currentLat,
                 currentLng,
-
+                city,
+                address,
+                postalCode,
 
             } = req.body
             Driver.update({
                 currentLat: currentLat,
                 currentLng: currentLng,
+                city: city,
+                address: address,
+                postalCode: postalCode,
             }, {
                 where: {
                     id: driverId

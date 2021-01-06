@@ -399,10 +399,16 @@ module.exports = {
             const {
                 currentLat,
                 currentLng,
+                city,
+                address,
+                postalCode,
             } = req.body
             Passenger.update({
                 currentLat: currentLat,
                 currentLng: currentLng,
+                city: city,
+                address: address,
+                postalCode: postalCode,
             }, {
                 where: {
                     id: passengerId
