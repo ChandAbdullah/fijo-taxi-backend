@@ -575,12 +575,13 @@ module.exports = {
                         include: [
                             {
                                 model: Vehicle,
-                                where: {
-                                    [op.and]:
-                                        [
-                                            { vehicleType: vehicleType }
-                                        ]
-                                },
+                                // we don't need to call only LITE 
+                                // where: {
+                                //     [op.and]:
+                                //         [
+                                //             { vehicleType: vehicleType }
+                                //         ]
+                                // },
                             }
                         ]
                     }

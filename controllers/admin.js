@@ -3,6 +3,7 @@ const hashedpassword = require("password-hash");
 const sequelize = require("sequelize");
 const op = sequelize.Op;
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const {
     Admin
@@ -95,4 +96,72 @@ module.exports = {
         }
     },
 
+    async updatePassword(req, res, next) {
+        try {
+            id = req.params.id;
+            const {
+                password
+            } = req.body
+
+            Admin.update({
+                password: hashedpassword.generate(password)
+            }, {
+                where: {
+                    id: id
+                }
+            })
+            return res.status(http_status_codes.StatusCodes.OK).json({
+                message: "Updated sussessfully"
+            })
+        } catch (error) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "An error updatePassword"
+            })
+        }
+    },
+
+    async forgotPassword(req, res, next) {
+        const reqData = req.body;
+        Admin.findOne({
+            where: { email: reqData.email }
+        }).then(isAdmin => {
+            if (isAdmin) {
+                // send email
+                var adminMail = req.body.email;
+                var transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'fijotaxi@gmail.com',
+                        pass: 'fijotaxi2020'
+                    }
+                });
+                var rand = Math.floor(100000 + Math.random() * 900000);
+                var mailOptions = {
+                    from: ' ', // sender address
+                    to: adminMail, // list of receivers
+                    subject: 'Admin Password Verification Code', // Subject line
+                    text: 'Here is a code to setup your password again', // plain text body
+                    html: 'Hi Dear Admin <br>Please verify your email using the link below and get back your password! <b style="font-size:24px;margin-left:30px"> Your code - ' + rand + '<b>' // html body
+
+                };
+                transporter.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                        console.log(error);
+                        res.json('error occured')
+                    } else {
+                        res.json({
+                            admin: isAdmin,
+                            verificationCode: rand
+                        });
+                    }
+                });
+
+            } else {
+                res.json({ message: "Email does not exit" });
+            }
+        }).catch(err => {
+            console.log(err);
+            res.json("Some Error Occured!");
+        });
+    },
 };

@@ -230,7 +230,15 @@ module.exports = {
                         isApproved: true
                     }
                     ]
-                }
+                },
+                attributes: [
+                    'id',
+                    'firstName',
+                    'lastName',
+                    'currentLat',
+                    'currentLng',
+                    'email',
+                ]
             });
             if (driver) {
                 return res.status(http_status_codes.StatusCodes.OK).json({
@@ -433,12 +441,17 @@ module.exports = {
             const {
                 currentLat,
                 currentLng,
-
+                city,
+                address,
+                postalCode,
 
             } = req.body
             Driver.update({
                 currentLat: currentLat,
                 currentLng: currentLng,
+                city: city,
+                address: address,
+                postalCode: postalCode,
             }, {
                 where: {
                     id: driverId
