@@ -81,35 +81,53 @@ module.exports = {
                 },
             }).then(isDriverExist => {
                 if (isDriverExist) {
-                    const verify_password = hashedpassword.verify(
-                        req.body.password, isDriverExist.password
-                    );
-                    if (verify_password) {
-                        if (isDriverExist.isApproved == true) {
-                            const token = jwt.sign({
-                                email: req.body.email,
-                                driverId: isDriverExist.id
-                            },
-                                "very-long-string-for-secret", {
-                                expiresIn: 3600
-                            }
-                            );
-                            res.json({
-                                message: "successfully login",
-                                accessToken: token,
-                                driver: isDriverExist,
-                                expiresIn: '3600'
-                            })
-                        } else if (isDriverExist.isApproved == false) {
-                            res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
-                                error: 'Sorry, you are not approved by Admin yet.'
-                            });
-                        }
-                    } else {
-                        res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
-                            error: 'invalidcredentials'
+                    if (isDriverExist.isLogedIn == true) {
+                        res.json({
+                            message: "You are already login from another device. Please logput first to login from this device",
+
                         })
+                    } else {
+                        const verify_password = hashedpassword.verify(
+                            req.body.password, isDriverExist.password
+                        );
+                        if (verify_password) {
+                            if (isDriverExist.isApproved == true) {
+                                const token = jwt.sign({
+                                    email: req.body.email,
+                                    driverId: isDriverExist.id
+                                },
+                                    "very-long-string-for-secret", {
+                                    expiresIn: 3600
+                                }
+                                );
+
+                                Driver.update({
+                                    isLogedIn: true
+                                }, {
+                                    where: {
+                                        id: isDriverExist.id
+                                    }
+                                })
+
+                                res.json({
+                                    message: "successfully login",
+                                    accessToken: token,
+                                    driver: isDriverExist,
+                                    expiresIn: '3600'
+                                })
+
+                            } else if (isDriverExist.isApproved == false) {
+                                res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
+                                    error: 'Sorry, you are not approved by Admin yet.'
+                                });
+                            }
+                        } else {
+                            res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
+                                error: 'invalidcredentials'
+                            })
+                        }
                     }
+
                 } else {
                     res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
                         error: 'driver does not exist'
@@ -316,7 +334,7 @@ module.exports = {
                 }
             }).then(findDriver => {
                 Driver.findByPk(driverId).then(resp => {
-                    return res.status(http_status_codes.OK).json({
+                    return res.status(http_status_codes.StatusCodes.OK).json({
                         message: "Updated sussessfully",
                         driverObj: resp
                     })
@@ -326,6 +344,29 @@ module.exports = {
         } catch (error) {
             return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: "an error occured in updateDriver"
+            })
+        }
+    },
+
+    async logoutDriver(req, res, next) {
+        try {
+            driverId = req.params.driverId;
+
+            Driver.update({
+                isLogedIn: false
+            }, {
+                where: {
+                    id: driverId
+                }
+            }).then(a => {
+                return res.status(http_status_codes.StatusCodes.OK).json({
+                    message: "Logedout sussessfully"
+                })
+            })
+
+        } catch (error) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "an error occured in logoutDriver"
             })
         }
     },
@@ -392,17 +433,12 @@ module.exports = {
             const {
                 currentLat,
                 currentLng,
-                city,
-                address,
-                postalCode,
+
 
             } = req.body
             Driver.update({
                 currentLat: currentLat,
                 currentLng: currentLng,
-                city: city,
-                address: address,
-                postalCode: postalCode,
             }, {
                 where: {
                     id: driverId

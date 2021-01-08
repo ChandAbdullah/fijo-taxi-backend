@@ -92,29 +92,44 @@ module.exports = {
                 },
             }).then(isPassengerExist => {
                 if (isPassengerExist) {
-                    const verify_password = hashedpassword.verify(
-                        req.body.password, isPassengerExist.password
-                    );
-                    if (verify_password) {
-                        const token = jwt.sign({
-                            email: req.body.email,
-                            pessengerId: isPassengerExist.id
-                        },
-                            "very-long-string-for-secret", {
-                            expiresIn: 3600
-                        }
-                        );
-
+                    if (isPassengerExist.isLogedIn == true) {
                         res.json({
-                            message: "successfully login",
-                            accessToken: token,
-                            pessenger: isPassengerExist,
-                            expiresIn: '3600'
+                            message: "You are already login from another device. Please logput first to login from this device",
+
                         })
                     } else {
-                        res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
-                            error: 'invalidcredentials'
-                        })
+                        const verify_password = hashedpassword.verify(
+                            req.body.password, isPassengerExist.password
+                        );
+                        if (verify_password) {
+                            const token = jwt.sign({
+                                email: req.body.email,
+                                pessengerId: isPassengerExist.id
+                            },
+                                "very-long-string-for-secret", {
+                                expiresIn: 3600
+                            }
+                            );
+
+                            Passenger.update({
+                                isLogedIn: true
+                            }, {
+                                where: {
+                                    id: isPassengerExist.id
+                                }
+                            })
+
+                            res.json({
+                                message: "successfully login",
+                                accessToken: token,
+                                pessenger: isPassengerExist,
+                                expiresIn: '3600'
+                            })
+                        } else {
+                            res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
+                                error: 'invalidcredentials'
+                            })
+                        }
                     }
                 } else {
                     res.status(http_status_codes.StatusCodes.UNAUTHORIZED).json({
@@ -196,6 +211,29 @@ module.exports = {
         } catch (error) {
             return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: "an error occured in updatePassenger"
+            })
+        }
+    },
+
+    async logoutPassenger(req, res, next) {
+        try {
+            passengerId = req.params.passengerId;
+
+            Passenger.update({
+                isLogedIn: false
+            }, {
+                where: {
+                    id: passengerId
+                }
+            }).then(a => {
+                return res.status(http_status_codes.StatusCodes.OK).json({
+                    message: "Logedout sussessfully"
+                })
+            })
+
+        } catch (error) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "an error occured in logoutDriver"
             })
         }
     },
@@ -399,16 +437,10 @@ module.exports = {
             const {
                 currentLat,
                 currentLng,
-                city,
-                address,
-                postalCode,
             } = req.body
             Passenger.update({
                 currentLat: currentLat,
                 currentLng: currentLng,
-                city: city,
-                address: address,
-                postalCode: postalCode,
             }, {
                 where: {
                     id: passengerId

@@ -22,9 +22,12 @@ module.exports = (sequelize, type) => {
       type: type.BOOLEAN,
       defaultValue: true
     },
+    isLogedIn: {
+      type: type.BOOLEAN,
+      defaultValue: false
+    },
   });
 };
-
 
 
 

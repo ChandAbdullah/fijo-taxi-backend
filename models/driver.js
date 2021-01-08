@@ -55,6 +55,9 @@ module.exports = (sequelize, type) => {
       type: type.BOOLEAN,
       defaultValue: false
     },
+    isLogedIn: {
+      type: type.BOOLEAN,
+      defaultValue: false
+    },
   });
 };
-
