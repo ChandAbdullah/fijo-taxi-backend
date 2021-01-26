@@ -26,7 +26,9 @@ module.exports = {
                 profilePhoto,
                 address,
                 postalCode,
-                city
+                city,
+                currentLat,
+                currentLng
             } = req.body;
 
 
@@ -49,7 +51,9 @@ module.exports = {
                         profilePhoto: profilePhoto,
                         address: address,
                         postalCode: postalCode,
-                        city: city
+                        city: city,
+                        currentLat: currentLat,
+                        currentLng: currentLng
                     })
                         .then((passenger) => {
 
@@ -328,6 +332,57 @@ module.exports = {
         } catch (error) {
             return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
                 message: "Error occured in fetching single getAvailabilityStatus"
+            })
+        }
+    },
+
+
+    async isPassengerLogin(req, res, next) {
+        try {
+            const passenger = await Passenger.findOne({ where: { id: req.params.passengerId } });
+            return res.status(http_status_codes.StatusCodes.OK).json({ isPassengerLogin: passenger.isLogedIn });
+
+        } catch (error) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "Error occured in fetching single driver"
+            })
+        }
+    },
+
+
+    async deletePassenger(req, res, next) {
+        try {
+            passengerId = req.params.passengerId;
+            const passenger = await Passenger.destroy({ where: { id: passengerId } });
+            return res.status(http_status_codes.StatusCodes.OK).json({ message: 'Passenger Deleted Successfully' });
+        }
+        catch (err) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "Error Occurd in Deleting Passenger"
+            });
+        }
+    },
+
+
+    async isLogedInTrue(req, res, next) {
+        try {
+            passengerId = req.params.passengerId;
+
+            Passenger.update({
+                isLogedIn: true
+            }, {
+                where: {
+                    id: passengerId
+                }
+            }).then(a => {
+                return res.status(http_status_codes.StatusCodes.OK).json({
+                    message: "is LogedIn True"
+                })
+            })
+
+        } catch (error) {
+            return res.status(http_status_codes.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                message: "an error occured in isLogedInTrueDriver"
             })
         }
     },

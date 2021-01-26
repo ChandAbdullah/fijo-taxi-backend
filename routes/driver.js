@@ -11,6 +11,7 @@ router.get('/approve-driver/:driverId', driverController.approveDriver);
 router.get('/dis-approve-driver/:driverId', driverController.disApproveDriver);
 router.post('/update/:driverId', driverController.updateDriver);
 router.post('/logout/:driverId', driverController.logoutDriver);
+router.post('/isLogin_True/:driverId', driverController.isLogedInTrue);
 router.post('/change-driver-availabiliy-status/:driverId', driverController.changeDriverAvailabiliyStatus);
 router.post('/create-driver-bank-details/:driverId', driverController.createDriverBankDetails);
 router.post('/update-current-location/:driverId', driverController.updateCurrentLocation);
@@ -31,6 +32,7 @@ router.post('/forgot-password', driverController.forgotPassword); // this api ca
 router.post('/find-driver-by-email', driverController.findDriverByEmail);
 router.post('/find-driver-by-phn-no', driverController.findDriverByPhoneNumber);
 router.get('/getallAvailableDrivers', driverController.getallAvailableDrivers);
-
+router.get('/is_Driver_Login/:driverId', driverController.isDriverLogin);
+router.post('/delete/:driverId', driverController.deleteDriver)
 
 module.exports = router;
